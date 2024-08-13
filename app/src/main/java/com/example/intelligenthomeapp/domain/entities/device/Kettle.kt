@@ -5,5 +5,4 @@ data class Kettle(
     override val id: UInt,
     override val online: Boolean,
     val currentTemperature: Float,
-    val targetTemperature: Float,
 ): Device
