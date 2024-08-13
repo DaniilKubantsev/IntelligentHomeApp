@@ -6,6 +6,6 @@ enum class DeviceType {
     Microwave,
     Vacuum,
     Luminaire,
-    Сonditioner,
+    Conditioner,
     Default,
 }
