@@ -1,4 +1,4 @@
-package com.example.intelligenthomeapp.domain.entities.device
+package com.example.intelligenthomeapp.settings.data.device
 
 enum class DeviceType {
     Fridge,
