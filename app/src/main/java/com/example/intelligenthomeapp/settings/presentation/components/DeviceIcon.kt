@@ -55,3 +55,22 @@ fun DeviceIcon(
 
 }
 
+
+@Composable
+fun DeviceIcon(
+    painter: Painter,
+    online: Boolean,
+) {
+
+    Icon(
+        painter = painter,
+        contentDescription = "",
+        modifier = Modifier
+            .size(40.dp),
+        tint = PrimaryText
+    )
+
+}
+
+
+

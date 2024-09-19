@@ -1,24 +1,26 @@
 package com.example.intelligenthomeapp.settings.presentation.screens
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.example.intelligenthomeapp.settings.data.device.Device
 import com.example.intelligenthomeapp.settings.data.device.DeviceFeature
+import com.example.intelligenthomeapp.settings.data.repository.AvailableDeviceRepositoryImpl
 import com.example.intelligenthomeapp.settings.data.repository.DeviceRepositoryImpl
 import com.example.intelligenthomeapp.settings.domain.repository.DeviceRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.buffer
 
 class SettingsViewModel(
-    private val repository: DeviceRepository = DeviceRepositoryImpl()
+    private val deviceRepository: DeviceRepository = DeviceRepositoryImpl(),
+    private val availableDeviceRepository: DeviceRepository = AvailableDeviceRepositoryImpl()
 ): ViewModel() {
     private val _uiState = MutableStateFlow(SettingsState())
     val uiState = _uiState.asStateFlow()
 
     init {
        _uiState.value = _uiState.value.copy(
-           deviceData = repository.getDeviceList()
+           availableDeviceData = availableDeviceRepository.getDeviceList(),
+           deviceData = deviceRepository.getDeviceList()
        )
     }
 
@@ -30,6 +32,31 @@ class SettingsViewModel(
         is SettingsEvent.SetTimer -> setTimer(event.id, event.seconds)
         is SettingsEvent.ChangePower -> changePower(event.id, event.wt)
         is SettingsEvent.EditDevice -> editDevice(event.id)
+        is SettingsEvent.AddDevice -> addDevice(event.id)
+        is SettingsEvent.ShowAvailableDevices -> showAvailableDevices()
+    }
+
+    private fun addDevice(
+        id: String
+    ) {
+        val newDevice = _uiState.value.availableDeviceData.find { it.id == id }!!
+        val newDeviceData = _uiState.value.deviceData.toMutableList().apply {
+            add(newDevice)
+        }
+        val newAvailableDeviceData = _uiState.value.availableDeviceData.toMutableList().apply {
+            remove(newDevice)
+        }
+        _uiState.value = _uiState.value.copy(
+            deviceData = newDeviceData,
+            availableDeviceData = newAvailableDeviceData
+        )
+    }
+
+    private fun showAvailableDevices() {
+        val a = _uiState.value.availableDeviceShown
+        _uiState.value = _uiState.value.copy(
+            availableDeviceShown = !a
+        )
     }
 
     private fun changePower(

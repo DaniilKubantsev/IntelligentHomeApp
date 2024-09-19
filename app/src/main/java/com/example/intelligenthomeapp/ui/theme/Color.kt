@@ -45,5 +45,6 @@ val GradLuminaire = Brush.horizontalGradient(listOf(LuminaireColor, a, ))
 val GradDefault = Brush.horizontalGradient(listOf(Primary, a, ))
 
 val GradPrimary = Brush.verticalGradient(listOf(Surface, Primary, Primary))
+val AltGradPrimary = Brush.verticalGradient(listOf(Primary, Surface, Surface, ))
 
 
