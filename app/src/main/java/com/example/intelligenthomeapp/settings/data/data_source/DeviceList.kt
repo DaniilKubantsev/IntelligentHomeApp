@@ -3,7 +3,7 @@ package com.example.intelligenthomeapp.settings.data.data_source
 import com.example.intelligenthomeapp.settings.data.device.Device
 import java.util.UUID
 
-var devicesData = mutableListOf(
+val devicesData = mutableListOf(
     Device.Vacuum(
         online = true,
         id = UUID.randomUUID().toString()

@@ -1,6 +1,9 @@
 package com.example.intelligenthomeapp.settings.presentation.screens
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.example.intelligenthomeapp.settings.data.data_source.devicesData
 import com.example.intelligenthomeapp.settings.data.device.Device
 import com.example.intelligenthomeapp.settings.data.device.DeviceFeature
 import com.example.intelligenthomeapp.settings.data.repository.AvailableDeviceRepositoryImpl
@@ -19,8 +22,8 @@ class SettingsViewModel(
 
     init {
        _uiState.value = _uiState.value.copy(
-           availableDeviceData = availableDeviceRepository.getDeviceList(),
-           deviceData = deviceRepository.getDeviceList()
+           availableDeviceData = availableDeviceRepository.get(),
+           deviceData = deviceRepository.get()
        )
     }
 
@@ -40,15 +43,11 @@ class SettingsViewModel(
         id: String
     ) {
         val newDevice = _uiState.value.availableDeviceData.find { it.id == id }!!
-        val newDeviceData = _uiState.value.deviceData.toMutableList().apply {
-            add(newDevice)
-        }
-        val newAvailableDeviceData = _uiState.value.availableDeviceData.toMutableList().apply {
-            remove(newDevice)
-        }
+        availableDeviceRepository.delete(id)
+        deviceRepository.add(newDevice)
         _uiState.value = _uiState.value.copy(
-            deviceData = newDeviceData,
-            availableDeviceData = newAvailableDeviceData
+            deviceData = deviceRepository.get(),
+            availableDeviceData = availableDeviceRepository.get()
         )
     }
 
@@ -59,107 +58,78 @@ class SettingsViewModel(
         )
     }
 
-    private fun changePower(
-        id: String,
-        wt: Int
-    ) {
-        val updatedDeviceList = _uiState.value.deviceData.map { device ->
-            if (device.id == id) {
-                when (device) {
-                    is Device.Microwave -> device.copy(
-                        power = DeviceFeature.Power(wt)
-                    )
-                    else -> device
-                }
-            } else {
-                device
-            }
+    private fun changePower(id: String, wt: Int) {
+        val device = _uiState.value.deviceData.find { it.id ==id }!!
+        val newDevice = when (device) {
+            is Device.Microwave -> device.copy(
+                power = DeviceFeature.Power(wt)
+            )
+            else -> device
         }
 
+        deviceRepository.update(id, newDevice)
+
         _uiState.value = _uiState.value.copy(
-            deviceData = updatedDeviceList
+            deviceData = deviceRepository.get()
         )
     }
 
-    private fun setTimer(
-        id: String,
-        seconds: Int
-    ) {
-        val updatedDeviceList = _uiState.value.deviceData.map { device ->
-            if (device.id == id) {
-                when (device) {
-                    is Device.Microwave -> device.copy(
-                        timer = DeviceFeature.Timer(seconds)
-                    )
-                    else -> device
-                }
-            } else {
-                device
-            }
+    private fun setTimer(id: String, seconds: Int) {
+        val device = _uiState.value.deviceData.find { it.id ==id }!!
+        val newDevice = when (device) {
+            is Device.Microwave -> device.copy(
+                timer = DeviceFeature.Timer(seconds)
+            )
+            else -> device
         }
 
+        deviceRepository.update(id, newDevice)
+
         _uiState.value = _uiState.value.copy(
-            deviceData = updatedDeviceList
+            deviceData = deviceRepository.get()
         )
     }
 
     private fun changeTemperature(id: String, temp: Float) {
-        val updatedDeviceList = _uiState.value.deviceData.map { device ->
-            if (device.id == id) {
-                when (device) {
-                    is Device.Conditioner -> device.copy(
-                        targetTemperature = DeviceFeature.Temperature(temp)
-                    )
-                    is Device.Fridge -> device.copy(
-                        targetTemperature = DeviceFeature.Temperature(temp)
-                    )
-                    is Device.Kettle -> device.copy(
-                        targetTemperature = DeviceFeature.Temperature(temp)
-                    )
-                    else -> device
-                }
-            } else {
-                device
-            }
+        val device = _uiState.value.deviceData.find { it.id ==id }!!
+        val newDevice: Device = when (device) {
+            is Device.Conditioner -> device.copy(targetTemperature = DeviceFeature.Temperature(temp))
+            is Device.Fridge -> device.copy(targetTemperature = DeviceFeature.Temperature(temp))
+            is Device.Kettle -> device.copy(targetTemperature = DeviceFeature.Temperature(temp))
+            else -> device
         }
 
+        deviceRepository.update(id, newDevice)
+
         _uiState.value = _uiState.value.copy(
-            deviceData = updatedDeviceList
+            deviceData = deviceRepository.get()
         )
 
     }
 
     private fun toggleDevice(id: String) {
-        val updatedDeviceList = _uiState.value.deviceData.map { device ->
-            if (device.id == id) {
-                when (device) {
-                    is Device.Conditioner -> device.copy(online = !device.online)
-                    is Device.Fridge -> device.copy(online = !device.online)
-                    is Device.Kettle -> device.copy(online = !device.online)
-                    is Device.Luminaire -> device.copy(online = !device.online)
-                    is Device.Microwave -> device.copy(online = !device.online)
-                    is Device.Vacuum -> device.copy(online = !device.online)
-                    is Device.Default -> device.copy(online = !device.online)
-                }
-            } else {
-                device
-            }
+        val device = _uiState.value.deviceData.find { it.id ==id }!!
+        val newDevice = when (device) {
+            is Device.Conditioner -> device.copy(online = !device.online)
+            is Device.Fridge -> device.copy(online = !device.online)
+            is Device.Kettle -> device.copy(online = !device.online)
+            is Device.Luminaire -> device.copy(online = !device.online)
+            is Device.Microwave -> device.copy(online = !device.online)
+            is Device.Vacuum -> device.copy(online = !device.online)
+            is Device.Default -> device.copy(online = !device.online)
         }
 
+        deviceRepository.update(id, newDevice)
+
         _uiState.value = _uiState.value.copy(
-            deviceData = updatedDeviceList
+            deviceData = deviceRepository.get()
         )
     }
 
     private fun deleteDevice(id: String) {
-        val device = _uiState.value.deviceData.find { it.id == id }
-        val newDeviceList = _uiState.value.deviceData
-            .toMutableList()
-            .apply {
-                remove(device)
-            }
+        deviceRepository.delete(id)
         _uiState.value = _uiState.value.copy(
-            deviceData = newDeviceList
+            deviceData = deviceRepository.get()
         )
     }
 
