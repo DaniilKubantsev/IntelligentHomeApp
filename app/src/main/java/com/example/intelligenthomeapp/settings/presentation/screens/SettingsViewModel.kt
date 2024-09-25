@@ -127,9 +127,12 @@ class SettingsViewModel(
     }
 
     private fun deleteDevice(id: String) {
+        val newDevice = _uiState.value.deviceData.find { it.id == id }!!
         deviceRepository.delete(id)
+        availableDeviceRepository.add(newDevice)
         _uiState.value = _uiState.value.copy(
-            deviceData = deviceRepository.get()
+            deviceData = deviceRepository.get(),
+            availableDeviceData = availableDeviceRepository.get()
         )
     }
 
